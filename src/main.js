@@ -20,10 +20,6 @@ Vue.use(axios)
 import Vuelidate from 'vuelidate'
 Vue.use(Vuelidate)
 
-import VueQuagga from 'vue-quaggajs';
-
-// register component 'v-quagga'
-Vue.use(VueQuagga);
 
 new Vue({
   router,

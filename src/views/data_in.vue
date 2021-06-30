@@ -46,13 +46,17 @@
                 </md-button>
             </span>
             </div>
+            <md-button @click="scan()" v-if="!active">Start Scanning for above item</md-button>
+            <md-button @click="stop()" v-if="active">Stop Scanning </md-button>
+            <StreamBarcodeReader
+                v-if="active"
+                @decode="(a, b, c) => onDecode(a)"
+            ></StreamBarcodeReader>
           </div>
         </div>
       </form>
     </div>
-    <div>
-      <v-quagga :onDetected="logIt" :readerSize="readerSize" :readerTypes="['ean_reader']"></v-quagga>
-    </div>
+
   </div>
 </template>
 
@@ -61,14 +65,19 @@ import Vue from "vue";
 import axios from "axios";
 
 const cookieExpiry = "100s";
+import {StreamBarcodeReader} from "vue-barcode-reader";
 
 
 export default {
   name: "data_in",
+  components: {
+    StreamBarcodeReader,
+  },
   data() {
     return {
       username: null,
       shopName: null,
+      barcode: [],
       dataIn: [
         {
           itemName: '',
@@ -86,16 +95,15 @@ export default {
           itemCount: false,
           itemPrice: false
         }
-      ]
+      ],
+      active: false
     }
   },
 
   computed: {},
 
   methods: {
-    logIt (data) {
-      console.log('detected', data)
-    },
+
 
     inputUpdate(index, type) {
       this.dataCheck[index][type] = false
@@ -193,18 +201,29 @@ export default {
       }
       this.username = Vue.$cookies.get("username")
       this.shopName = Vue.$cookies.get("shopid")
+    },
+    scan() {
+      console.log(this.dataIn.length)
+      this.active = true;
+    },
+    stop() {
+      this.active = false;
+    },
+    onDecode(a) {
+      console.log(a);
+      this.barcode.push(a);
+      if (this.barcode.length >= 1)
+        this.setCode()
+    },
+    setCode(){
+      this.dataIn[this.dataIn.length-1]['itemName'] = this.barcode[0]
+      this.barcode = []
+      this.stop()
     }
   },
   beforeMount() {
     this.CC();
-    this.roleCheck()
-    navigator.permissions.query({name: 'camera'})
-        .then((permissionObj) => {
-          alert(permissionObj.state);
-        })
-        .catch((error) => {
-          alert('Got error :', error);
-        })
+    this.roleCheck();
   }
 }
 </script>
@@ -223,7 +242,6 @@ export default {
 .item {
   border-bottom: 1px dotted grey;
 }
-
 
 
 .cut {
