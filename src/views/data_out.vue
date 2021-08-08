@@ -13,7 +13,7 @@
     <div class="Form">
       <form novalidate @submit.prevent="">
         <div class=" mainArea md-small-size-100 md-elevation-15">
-          <md-autocomplete v-model="merchant" :md-options="merchantList" :class="{ 'md-invalid': merchantNameCheck }" :md-open-on-focus="false" :md-fuzzy-search="true">
+          <md-autocomplete v-model="merchant" :md-options="merchantList" :class="{ 'md-invalid': merchantNameCheck }" :md-open-on-focus="false">
             <label>Merchant Name</label>
 
             <template slot="md-autocomplete-item" slot-scope="{ item, term }">
@@ -21,7 +21,7 @@
             </template>
 
             <template slot="md-autocomplete-empty">
-               <a @click="updateMerchant()">Create a new</a> one!
+              <a @click="update()">Create a new</a> one!
             </template>
             <span class="md-error">Merchant Name Required</span>
 
@@ -38,14 +38,14 @@
                       d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
               </div>
-              <md-autocomplete v-model="item.itemName" :md-options="itemList" :class="{ 'md-invalid': dataCheck[index]['itemName'] }" :md-open-on-focus="false" :md-fuzzy-search="true"  @input="inputUpdate(index,'itemName')">
+              <md-autocomplete v-model="item.itemName" :md-options="itemList" :class="{ 'md-invalid': dataCheck[index]['itemName'] }" :md-open-on-focus="false"  @input="inputUpdate(index,'itemName')">
                 <label >Item Name </label>
                 <template slot="md-autocomplete-item" slot-scope="{ item, term }">
                   <md-highlight-text :md-term="term">{{ item }}</md-highlight-text>
                 </template>
 
                 <template slot="md-autocomplete-empty">
-                  <a @click="updateItem(index)">Create a new</a> one!
+                  <a @click="update()">Create a new</a> one!
                 </template>
                 <span class="md-error">Item Name is Required</span>
 
@@ -53,13 +53,13 @@
               <md-field :class="{ 'md-invalid': dataCheck[index]['itemCount'] }">
                 <label >Item Count</label>
                 <md-input  v-model="item.itemCount" @input="inputUpdate(index,'itemCount')"
-                          type="number"/>
+                           type="number"/>
                 <span class="md-error">Item Count is required</span>
               </md-field>
               <md-field :class="{ 'md-invalid': dataCheck[index]['itemPrice'] }">
                 <label >Item Price</label>
                 <md-input  v-model="item.itemPrice" @input="inputUpdate(index,'itemPrice')"
-                          type="number"/>
+                           type="number"/>
                 <span class="md-error">Item Price is required</span>
               </md-field>
               <span>
@@ -128,7 +128,7 @@ import {StreamBarcodeReader} from "vue-barcode-reader";
 
 
 export default {
-  name: "data_in",
+  name: "data_out",
   components: {
     StreamBarcodeReader,
   },
@@ -197,7 +197,6 @@ export default {
       orderCheck: false
     }
   },
-
   watch:{
     orderCheck : function (){
       if (this.orderCheck === false)
@@ -363,7 +362,7 @@ export default {
         "username": Vue.$cookies.get("username"),
         "shopid": Vue.$cookies.get("shopid"),
         "cookie": Vue.$cookies.get("cookie"),
-        "type" : "IN",
+        "type" : "OUT",
         "pre_tax" : this.total_pre_tax,
         "sgst" : this.sgst,
         "cgst" : this.cgst,
@@ -401,61 +400,8 @@ export default {
             }, 1000)
           });
     },
-    updateMerchant(){
+    update(){
       this.merchantList.push(this.merchant)
-      localStorage.setItem("Merchant", JSON.stringify(this.merchantList))
-      var data = JSON.stringify({
-        "shopid" : Vue.$cookies.get("shopid"),
-        "type" : "Merchant",
-        "selection" : "In",
-        "data" : this.merchantList
-      })
-      var config = {
-        method: 'post',
-        url: 'https://inv.amolbohora.com/auto',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      };
-      var that = this;
-      axios(config)
-          .then(function (response) {
-            console.log(response.data['Data'])
-          })
-          .catch(function (error){
-            that.showSnackbar = true;
-            that.errorMessage = error.response.data['Message'];
-            console.log(error);
-          });
-    },
-    updateItem(index){
-      this.itemList.push(this.dataIn[index]['itemName'])
-      localStorage.setItem("Items", JSON.stringify(this.itemList))
-      var data = JSON.stringify({
-        "shopid" : Vue.$cookies.get("shopid"),
-        "type" : "Items",
-        "selection" : "In",
-        "data" : this.itemList
-      })
-      var config = {
-        method: 'post',
-        url: 'https://inv.amolbohora.com/auto',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      };
-      var that = this;
-      axios(config)
-          .then(function (response) {
-            console.log(response.data['Data'])
-          })
-          .catch(function (error){
-            that.showSnackbar = true;
-            that.errorMessage = error.response.data['Message'];
-            console.log(error);
-          });
     },
     listChecker(){
       let local_data = localStorage.getItem("Merchant");

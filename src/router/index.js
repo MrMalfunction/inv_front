@@ -22,6 +22,21 @@ const routes = [
     path: "/Data_In",
     name: "Data_In",
     component: () => import('../views/data_in.vue')
+  },
+  {
+    path:"/Data_Out",
+    name: "Data_Out",
+    component: () => import('../views/data_out.vue')
+  },
+  {
+    path: "/View_Live",
+    name: "Live Inventory",
+    component: () => import('../views/live_inv')
+  },
+  {
+    path: "/View_Past",
+    name: "Past Transactions",
+    component: () => import('../views/pastTransactions')
   }
 ]
 
