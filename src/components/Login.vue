@@ -185,7 +185,7 @@ export default {
         this.Login();
         window.setTimeout(() => {
           this.sending = false
-        }, 100)
+        }, 10)
       }
     }
   },

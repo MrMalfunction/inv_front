@@ -28,7 +28,8 @@
               <span class="md-helper-text">Default Value IN</span>
             </md-field>
           </div>
-          <md-autocomplete v-model="merchant" :md-options="merchantList" :class="{ 'md-invalid': merchantNameCheck }" :md-open-on-focus="false" :md-fuzzy-search="true">
+          <md-autocomplete v-model="merchantName" :md-options="merchantList" :md-open-on-focus="false"
+                           :md-fuzzy-search="true">
             <label>Merchant Name</label>
             <template slot="md-autocomplete-item" slot-scope="{ item, term }">
               <md-highlight-text :md-term="term">{{ item }}</md-highlight-text>
@@ -41,6 +42,25 @@
         </div>
       </form>
     </div>
+
+    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="asc" md-card class="tableArea" md-fixed-header v-if="tableVisibilty">
+      <md-table-toolbar>
+        <h1 class="md-title">Retrieved Data</h1>
+      </md-table-toolbar>
+
+      <md-table-row slot="md-table-row" slot-scope="{ item }" >
+        <md-table-cell md-label="Timestamp"  md-sort-by="Timestamp" class="tableRows">{{ item.timestamp }}</md-table-cell>
+        <md-table-cell md-label="Transaction Id" md-sort-by="Transaction-Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
+        <md-table-cell md-label="Merchant" md-sort-by="merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
+        <md-table-cell md-label="Total" md-sort-by="total" class="tableRows">{{ item.total }}</md-table-cell>
+        <md-table-cell md-label="Data"  md-sort-by="Data" class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
+      </md-table-row>
+    </md-table>
+
+    <md-snackbar :md-duration="2000" :md-active.sync="showSnackbar" md-persistent>
+      <span> {{ this.errorMessage }} </span>
+      <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
+    </md-snackbar>
   </div>
 </template>
 
@@ -54,7 +74,12 @@ const cookieExpiry = "100s";
 export default {
   name: "pastTransactions",
   components: {},
-  computed: {},
+  computed: {
+    tableVisibilty: function () {
+      return this.finalTableData !== {};
+
+    }
+  },
   data() {
     let now = new Date()
     let past = (d => new Date(d.setDate(d.getDate() - 7)))(new Date)
@@ -66,13 +91,63 @@ export default {
       type: "",
       fromDate: Number(now),
       toDate: Number(past),
-      tableData: null,
-      lastKey: null
-
+      tableData: {},
+      finalTableData: null,
+      lastKey: "NULL",
+      errorMessage: null,
+      showSnackbar: false,
     }
   },
 
   methods: {
+
+    submit() {
+      this.merchantName = this.merchantName === null ? "NULL" : this.merchantName;
+      this.type = this.type === "" ? "IN" : this.type;
+
+      var data = JSON.stringify({
+        "shopid": Vue.$cookies.get('shopid'),
+        "merchant": this.merchantName,
+        "data": this.dataIn,
+        "username": Vue.$cookies.get("username"),
+        "cookie": Vue.$cookies.get("cookie"),
+        "type": this.type,
+        "time_start": (this.fromDate / 1000).toString(),
+        "time_end": (this.toDate / 1000).toString(),
+        "Last_Key": this.lastKey
+      });
+      console.log(data);
+      var config = {
+        method: 'post',
+        url: 'https://inv.amolbohora.com/dataView',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: data
+      };
+      var that = this;
+      axios(config)
+          .then(function (response) {
+            console.log(response.data);
+            that.tableData = response.data;
+            that.modifier();
+          })
+          .catch(function (error) {
+            that.showSnackbar = true;
+            that.errorMessage = error.response.data['Message'];
+            console.log(error);
+            window.setTimeout(() => {
+              if (error.response.data['Message'] === "Cookie not matched") {
+                Vue.$cookies.remove("cookie")
+                Vue.$cookies.remove("username")
+                Vue.$cookies.remove("shopid")
+                Vue.$cookies.remove("CC")
+                that.$router.replace("/")
+              }
+            }, 1000)
+          });
+    },
+
     async CC() {
       if (!Vue.$cookies.get("CC")) {
         const self = this;
@@ -114,7 +189,6 @@ export default {
     },
     listChecker() {
       let local_data = localStorage.getItem("Merchant");
-      console.log(local_data)
       if (local_data === null) {
         var data = JSON.stringify({
           "shopid": Vue.$cookies.get("shopid"),
@@ -133,7 +207,6 @@ export default {
         var that = this;
         axios(config)
             .then(function (response) {
-              console.log(response.data['Data'])
               that.merchantList = response.data['Data']
               localStorage.setItem("Merchant", JSON.stringify(that.merchantList))
             })
@@ -163,9 +236,68 @@ export default {
       }
       this.username = Vue.$cookies.get("username")
       this.shopName = Vue.$cookies.get("shopid")
+    },
+    modifier() {
+      var temp = this.tableData['Items'];
+      var MainItems = [];
+      console.log(temp);
+      for (var i = 0; i < temp.length; i++) {
+        var Line = {
+          "merchant": null,
+          "cgst": null,
+          "sgst": null,
+          "igst": null,
+          "timestamp": null,
+          "Transaction_Id": null,
+          "total": null,
+          "data": ""
+        }
+        Line['merchant'] = temp[i]['merchant']
+        Line['cgst'] = temp[i]['cgst'] === null ? '0' : temp[i]['cgst']
+        Line['sgst'] = temp[i]['sgst'] === null ? '0' : temp[i]['sgst']
+        Line['igst'] = temp[i]['igst'] === null ? '0' : temp[i]['igst']
+        Line['timestamp'] = this.convertTimestamp(temp[i]['timestamp']);
+        Line['Transaction_Id'] = temp[i]['transaction-id']
+        Line['total'] = temp[i]['total']
+        let dataString = "";
+        for (var j = 0; j < temp[i]['data'].length; j++) {
+          dataString += temp[i]['data'][j]['itemName'] + "," + temp[i]['data'][j]['itemCount'] + "," + temp[i]['data'][j]['itemPrice'] + '\n';
+        }
+        Line['data'] = dataString
+        MainItems.push(Line);
+      }
+      this.finalTableData = MainItems;
+      console.log(MainItems);
+    },
+    convertTimestamp(timestamp) {
+      var d = new Date(timestamp * 1000),	// Convert the passed timestamp to milliseconds
+          yyyy = d.getFullYear(),
+          mm = ('0' + (d.getMonth() + 1)).slice(-2),	// Months are zero based. Add leading 0.
+          dd = ('0' + d.getDate()).slice(-2),			// Add leading 0.
+          hh = d.getHours(),
+          h = hh,
+          min = ('0' + d.getMinutes()).slice(-2),		// Add leading 0.
+          ampm = 'AM',
+          time;
+
+      if (hh > 12) {
+        h = hh - 12;
+        ampm = 'PM';
+      } else if (hh === 12) {
+        h = 12;
+        ampm = 'PM';
+      } else if (hh === 0) {
+        h = 12;
+      }
+
+      // ie: 2013-02-18, 8:35 AM
+      time = dd + '/' + mm + '/' + yyyy + ', ' + h + ':' + min + ' ' + ampm;
+
+      return time;
     }
   },
   beforeMount() {
+    this.modifier();
     this.CC();
     this.roleCheck();
     this.listChecker();
@@ -193,5 +325,18 @@ export default {
 
 .Form {
   padding: 10px;
+}
+
+
+.tableArea{
+  min-width: 50vw;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.tableRows{
+  border-style: dashed;
+  border-width: thin;
+  text-align: left;
 }
 </style>
