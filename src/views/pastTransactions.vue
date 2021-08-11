@@ -61,6 +61,7 @@
       <span> {{ this.errorMessage }} </span>
       <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
     </md-snackbar>
+
   </div>
 </template>
 
@@ -89,13 +90,35 @@ export default {
       merchantName: null,
       merchantList: [],
       type: "",
-      fromDate: Number(now),
-      toDate: Number(past),
-      tableData: {},
+      fromDate: Number(past),
+      toDate: Number(now),
+      tableData: {
+        "Items": [
+          {
+            "pre_tax": "",
+            "shopid": "",
+            "sgst": "",
+            "data": [
+              {
+                "itemName": "",
+                "itemPrice": "",
+                "itemCount": ""
+              }
+            ],
+            "timestamp": "",
+            "total": "",
+            "cgst": "",
+            "transaction-id": "",
+            "merchant": "",
+            "igst": 0
+          }
+        ],
+        "Last_Key": "NULL"
+      },
       finalTableData: null,
       lastKey: "NULL",
       errorMessage: null,
-      showSnackbar: false,
+      showSnackbar: false
     }
   },
 
@@ -256,14 +279,19 @@ export default {
         Line['cgst'] = temp[i]['cgst'] === null ? '0' : temp[i]['cgst']
         Line['sgst'] = temp[i]['sgst'] === null ? '0' : temp[i]['sgst']
         Line['igst'] = temp[i]['igst'] === null ? '0' : temp[i]['igst']
-        Line['timestamp'] = this.convertTimestamp(temp[i]['timestamp']);
+        if (temp[i]['timestamp'] === "")
+          Line['timestamp'] = "";
+        else
+          Line['timestamp'] = this.convertTimestamp(temp[i]['timestamp']);
         Line['Transaction_Id'] = temp[i]['transaction-id']
         Line['total'] = temp[i]['total']
         let dataString = "";
         for (var j = 0; j < temp[i]['data'].length; j++) {
+          if(temp[i]['data'][j]['itemName'] === "")
+            continue;
           dataString += temp[i]['data'][j]['itemName'] + "," + temp[i]['data'][j]['itemCount'] + "," + temp[i]['data'][j]['itemPrice'] + '\n';
         }
-        Line['data'] = dataString
+        Line['data'] = dataString;
         MainItems.push(Line);
       }
       this.finalTableData = MainItems;

@@ -57,6 +57,7 @@
 
 <script>
 import {validationMixin} from 'vuelidate'
+
 import {
   required,
 } from 'vuelidate/lib/validators'
