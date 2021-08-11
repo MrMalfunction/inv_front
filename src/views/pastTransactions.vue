@@ -53,7 +53,7 @@
         <md-table-cell md-label="Transaction Id" md-sort-by="Transaction-Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
         <md-table-cell md-label="Merchant" md-sort-by="merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
         <md-table-cell md-label="Total" md-sort-by="total" class="tableRows">{{ item.total }}</md-table-cell>
-        <md-table-cell md-label="Data"  md-sort-by="Data" class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
+        <md-table-cell md-label="Data(Item Name, Item Count, Item Price)"  md-sort-by="Data" class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
       </md-table-row>
     </md-table>
 
