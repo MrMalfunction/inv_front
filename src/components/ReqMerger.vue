@@ -24,7 +24,7 @@ export default {
         var flag = true;
         for (var i = 0; i < this.finalData.length; i++) {
           if (this.finalData[i]['itemName'] === data[j]['itemName'] && this.finalData[i]['itemPrice'] === data[j]['itemPrice']) {
-            this.finalData[i]['itemCount'] += parseFloat(data[j]['itemCount'])
+            this.finalData[i]['itemCount'] += parseInt(data[j]['itemCount'])
             flag = false;
             break;
           }
@@ -32,7 +32,7 @@ export default {
         if (flag === true) {
           var temp = {
             itemName: data[j]['itemName'],
-            itemCount: parseFloat(data[j]['itemCount']),
+            itemCount: parseInt(data[j]['itemCount']),
             itemPrice: data[j]['itemPrice']
           }
           this.finalData.push(temp);
@@ -41,7 +41,7 @@ export default {
       this.total_cgst += cgst;
       this.total_igst += igst;
       this.total_sgst += sgst;
-      this.totalAmount += parseFloat(total);
+      this.totalAmount += parseInt(total);
       this.total_discount += discount;
       console.log(JSON.stringify(this.finalData));
       if (this.finalData.length >= 20){
@@ -52,7 +52,7 @@ export default {
           "shopid": Vue.$cookies.get("shopid"),
           "cookie": Vue.$cookies.get("cookie"),
           "type" : "OUT",
-          "pre_tax" :parseFloat(this.totalAmount) - parseFloat(this.total_discount),
+          "pre_tax" :parseInt(this.totalAmount) - parseInt(this.total_discount),
           "sgst" : this.total_sgst,
           "cgst" : this.total_cgst,
           "igst" : this.total_igst,

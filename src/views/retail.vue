@@ -356,7 +356,7 @@ export default {
           this.dataCheck[i]['itemPrice'] = false
         }
       }
-      this.$refs.ReqMerger.transaction(this.dataIn,this.sgst,this.igst,this.cgst,this.total,this.discountAmount);
+      this.$refs.ReqMerger.transaction(this.dataIn,this.sgst,this.igst,this.cgst,parseInt(this.total),this.discountAmount);
       this.dataIn = [
             {
               itemName: '',
