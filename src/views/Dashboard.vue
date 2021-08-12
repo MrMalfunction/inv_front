@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     async CC() {
-      if (!Vue.$cookies.get("CC")) {
+      if (!Vue.$cookies.isKey("CC")) {
         const self = this;
         this.sending = true
         var shopid = Vue.$cookies.get("shopid");
@@ -47,7 +47,7 @@ export default {
           var data = JSON.stringify({
             "shopid": Vue.$cookies.get("shopid"),
             "username": Vue.$cookies.get("username"),
-            "cookie": Vue.$cookies.get("shopid"),
+            "cookie": Vue.$cookies.get("cookie"),
             "type": "CC"
           });
 
@@ -63,6 +63,9 @@ export default {
           await axios(config)
               .then(function (response) {
                 Vue.$cookies.set("CC", "true", cookieExpiry)
+                if (response.data['role']['Data_Out'] === "true"){
+                  response.data['role']['Retail'] = "true";
+                }
                 Vue.$cookies.set("Roles", response.data['role'], cookieExpiry)
               })
               .catch(function () {

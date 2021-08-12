@@ -43,7 +43,7 @@
       </form>
     </div>
 
-    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="asc" md-card class="tableArea" md-fixed-header v-if="tableVisibilty">
+    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="dsc" md-card class="tableArea" md-fixed-header v-if="tableVisibilty">
       <md-table-toolbar>
         <h1 class="md-title">Retrieved Data</h1>
       </md-table-toolbar>
@@ -172,7 +172,7 @@ export default {
     },
 
     async CC() {
-      if (!Vue.$cookies.get("CC")) {
+      if (!Vue.$cookies.isKey("CC")) {
         const self = this;
         this.sending = true
         var shopid = Vue.$cookies.get("shopid");
@@ -180,7 +180,7 @@ export default {
           var data = JSON.stringify({
             "shopid": Vue.$cookies.get("shopid"),
             "username": Vue.$cookies.get("username"),
-            "cookie": Vue.$cookies.get("shopid"),
+            "cookie": Vue.$cookies.get("cookie"),
             "type": "CC"
           });
 
@@ -250,7 +250,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!Vue.$cookies.get("Roles")["Data_In"] === "true") {
+      if (!Vue.$cookies.get("Roles")["View_Past"] === "true") {
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")
@@ -357,7 +357,7 @@ export default {
 
 
 .tableArea{
-  min-width: 50vw;
+  min-width: 30vw;
   padding: 20px;
   border-radius: 10px;
 }

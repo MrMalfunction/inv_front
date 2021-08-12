@@ -13,19 +13,6 @@
     <div class="Form">
       <form novalidate @submit.prevent="">
         <div class=" mainArea md-small-size-100 md-elevation-15">
-          <md-autocomplete v-model="merchant" :md-options="merchantList" :class="{ 'md-invalid': merchantNameCheck }" :md-open-on-focus="false">
-            <label>Merchant Name</label>
-
-            <template slot="md-autocomplete-item" slot-scope="{ item, term }">
-              <md-highlight-text :md-term="term">{{ item }}</md-highlight-text>
-            </template>
-
-            <template slot="md-autocomplete-empty">
-              <a @click="update()">Create a new</a> one!
-            </template>
-            <span class="md-error">Merchant Name Required</span>
-
-          </md-autocomplete>
 
           <div class=" md-small-size-100">
             <div class=" item" v-for="(item, index) in dataIn" :key="index">
@@ -120,6 +107,7 @@
       <span> {{ this.errorMessage }} </span>
       <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
     </md-snackbar>
+    <ReqMerger ref="ReqMerger"/>
   </div>
 </template>
 
@@ -129,12 +117,13 @@ import axios from "axios";
 
 const cookieExpiry = "100s";
 import {StreamBarcodeReader} from "vue-barcode-reader";
-
+import ReqMerger from "../components/ReqMerger";
 
 export default {
-  name: "data_out",
+  name: "Retail",
   components: {
     StreamBarcodeReader,
+    ReqMerger
   },
   computed: {
     order_id_message : function (){
@@ -168,7 +157,7 @@ export default {
       if (this.discount >=0) {
         discount = (this.discount / 100) * parseFloat(this.total_pre_tax);
         this.updateTotal(this.total_pre_tax - discount);
-        this.updateDiscount(discount);
+       this.updateDiscount(discount);
       }
       return  (parseFloat(this.finalPrice) + parseFloat(this.sgst) + parseFloat(this.cgst) + parseFloat(this.igst)).toFixed(2);
     }
@@ -177,14 +166,12 @@ export default {
     return {
       errorMessage: null,
       showSnackbar: false,
-      merchant: null,
       merchantList: [],
       itemList : [],
       username: null,
       shopName: null,
       autoOn: false,
       barcode: [],
-      merchantNameCheck: false,
       finalPrice: 0,
       discount: 0,
       discountAmount: 0,
@@ -202,6 +189,7 @@ export default {
           itemPrice: false
         }
       ],
+      data: [],
       active: false,
       sgst_percent: '',
       cgst_percent: '',
@@ -345,12 +333,6 @@ export default {
       this.stop()
     },
     submit() {
-      if (this.merchant === null){
-        this.merchantNameCheck = true;
-        return
-      }
-      else
-        this.merchantNameCheck = false;
       for (var i = 0; i < this.dataIn.length; i++){
         if (this.dataIn[i]['itemName'] === ''){
           this.dataCheck[i]['itemName'] = true
@@ -374,8 +356,20 @@ export default {
           this.dataCheck[i]['itemPrice'] = false
         }
       }
-      console.log(this.dataIn);
-      var data = JSON.stringify({
+      this.$refs.ReqMerger.transaction(this.dataIn,this.sgst,this.igst,this.cgst,this.total,this.discountAmount);
+      this.dataIn = [
+            {
+              itemName: '',
+              itemCount: '',
+              itemPrice: ''
+            }]
+      this.dataCheck = [{
+        itemName: false,
+        itemCount: false,
+        itemPrice: false
+      }]
+      this.discount = 0;
+      /*var data = JSON.stringify({
         "merchant": this.merchant,
         "data": this.dataIn,
         "username": Vue.$cookies.get("username"),
@@ -418,7 +412,7 @@ export default {
                 that.$router.replace("/")
               }
             }, 1000)
-          });
+          });*/
     },
     update(){
       this.merchantList.push(this.merchant)

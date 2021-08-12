@@ -170,6 +170,9 @@ export default {
             Vue.$cookies.set('username', self.form.username, cookieExpiry);
             Vue.$cookies.set("CC" , "true", cookieExpiry);
             self.showSuccess = true
+            if (response.data['role']['Data_Out'] === "true"){
+              response.data['role']['Retail'] = "true";
+            }
             Vue.$cookies.set("Roles", response.data['role'],cookieExpiry)
             self.$router.push('dashboard');
           })

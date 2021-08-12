@@ -37,6 +37,11 @@ const routes = [
     path: "/View_Past",
     name: "Past Transactions",
     component: () => import('../views/pastTransactions')
+  },
+  {
+    path: "/Retail",
+    name: "Retail",
+    component: () => import('../views/retail')
   }
 ]
 

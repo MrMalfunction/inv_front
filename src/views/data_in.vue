@@ -91,7 +91,12 @@
               <label>IGST %</label>
               <md-input type="number" v-model="igst_percent" min=0 />
             </md-field>
+            <md-field class="md-layout-item md-medium-size-33 md-small-size-50 md-xsmall-size-100 gst-module ">
+              <label>Discount %</label>
+              <md-input type="number" v-model="disount" min=0 />
+            </md-field>
           </div>
+
           <div class="TOT_SG">
             <div class="total_heading">TOTAL SGST</div>
             <div class="total_value">₹ {{ sgst }}</div>
@@ -146,21 +151,27 @@ export default {
     },
     sgst: function () {
       if (this.sgst_percent > 0)
-        return ((this.sgst_percent / 100.0) * this.total_pre_tax).toFixed(2)
+        return ((this.sgst_percent / 100.0) * this.finalPrice).toFixed(2)
       return 0.0
     },
     cgst: function () {
       if (this.cgst_percent > 0)
-        return ((this.cgst_percent / 100.0) * this.total_pre_tax).toFixed(2)
+        return ((this.cgst_percent / 100.0) * this.finalPrice).toFixed(2)
       return 0.0
     },
     igst: function () {
       if (this.igst_percent > 0)
-        return ((this.igst_percent / 100.0) * this.total_pre_tax).toFixed(2)
+        return ((this.igst_percent / 100.0) * this.finalPrice).toFixed(2)
       return 0.0
     },
     total: function () {
-      return (parseFloat(this.total_pre_tax) + parseFloat(this.sgst) + parseFloat(this.cgst) + parseFloat(this.igst)).toFixed(2)
+      let discount;
+      if (this.disount >= 0) {
+        discount = (this.disount / 100) * parseFloat(this.total_pre_tax);
+        this.updateTotal(this.total_pre_tax - discount);
+        this.updateDiscount(discount);
+      }
+      return  (parseFloat(this.finalPrice) + parseFloat(this.sgst) + parseFloat(this.cgst) + parseFloat(this.igst)).toFixed(2);
     }
   },
   data() {
@@ -175,6 +186,7 @@ export default {
       autoOn: false,
       barcode: [],
       merchantNameCheck: false,
+      finalPrice: 0,
       dataIn: [
         {
           itemName: '',
@@ -194,7 +206,9 @@ export default {
       cgst_percent: '',
       igst_percent: '',
       order_id: '',
-      orderCheck: false
+      orderCheck: false,
+      disount: 0,
+      discountAmount: 0
     }
   },
 
@@ -206,7 +220,12 @@ export default {
   },
 
   methods: {
-
+    updateTotal(price){
+      this.finalPrice = price;
+    },
+    updateDiscount(discount){
+      this.discountAmount = discount;
+    },
     updateAutoOn() {
       localStorage.setItem("auto", this.autoOn)
     },
@@ -252,7 +271,7 @@ export default {
 
 
     async CC() {
-      if (!Vue.$cookies.get("CC")) {
+      if (!Vue.$cookies.isKey("CC")) {
         const self = this;
         this.sending = true
         var shopid = Vue.$cookies.get("shopid");
@@ -260,7 +279,7 @@ export default {
           var data = JSON.stringify({
             "shopid": Vue.$cookies.get("shopid"),
             "username": Vue.$cookies.get("username"),
-            "cookie": Vue.$cookies.get("shopid"),
+            "cookie": Vue.$cookies.get("cookie"),
             "type": "CC"
           });
 
@@ -368,7 +387,8 @@ export default {
         "sgst" : this.sgst,
         "cgst" : this.cgst,
         "igst" : this.igst,
-        "total" : this.total
+        "total" : this.total,
+        "discount": this.discount
       });
       var config = {
         method: 'post',

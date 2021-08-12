@@ -32,7 +32,7 @@ export default {
 
   methods: {
     async CC() {
-      if (!Vue.$cookies.get("CC")) {
+      if (!Vue.$cookies.isKey("CC")) {
         const self = this;
         this.sending = true
         var shopid = Vue.$cookies.get("shopid");
@@ -40,7 +40,7 @@ export default {
           var data = JSON.stringify({
             "shopid": Vue.$cookies.get("shopid"),
             "username": Vue.$cookies.get("username"),
-            "cookie": Vue.$cookies.get("shopid"),
+            "cookie": Vue.$cookies.get("cookie"),
             "type": "CC"
           });
 
