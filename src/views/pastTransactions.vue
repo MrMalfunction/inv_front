@@ -43,7 +43,7 @@
       </form>
     </div>
 
-    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="dsc" md-card class="tableArea" md-fixed-header v-if="tableVisibilty">
+    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="dsc" md-card class="tableArea" v-if="tableVisibilty">
       <md-table-toolbar>
         <h1 class="md-title">Retrieved Data</h1>
       </md-table-toolbar>
@@ -52,7 +52,7 @@
         <md-table-cell md-label="Timestamp"  md-sort-by="Timestamp" class="tableRows">{{ item.timestamp }}</md-table-cell>
         <md-table-cell md-label="Transaction Id" md-sort-by="Transaction-Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
         <md-table-cell md-label="Merchant" md-sort-by="merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
-        <md-table-cell md-label="Total" md-sort-by="total" class="tableRows">{{ item.total }}</md-table-cell>
+        <md-table-cell md-label="Total, Discount" md-sort-by="total" class="tableRows">{{ item.total }}</md-table-cell>
         <md-table-cell md-label="Data(Item Name, Item Count, Item Price)"  md-sort-by="Data" class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
       </md-table-row>
     </md-table>
@@ -284,7 +284,7 @@ export default {
         else
           Line['timestamp'] = this.convertTimestamp(temp[i]['timestamp']);
         Line['Transaction_Id'] = temp[i]['transaction-id']
-        Line['total'] = temp[i]['total']
+        Line['total'] = temp[i]['total'] + "," + temp[i]['discount'];
         let dataString = "";
         for (var j = 0; j < temp[i]['data'].length; j++) {
           if(temp[i]['data'][j]['itemName'] === "")
@@ -295,6 +295,7 @@ export default {
         MainItems.push(Line);
       }
       this.finalTableData = MainItems;
+      this.lastKey = this.tableData['Last_Key']
       console.log(MainItems);
     },
     convertTimestamp(timestamp) {

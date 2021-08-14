@@ -44,7 +44,7 @@ export default {
       this.totalAmount += parseInt(total);
       this.total_discount += discount;
       console.log(JSON.stringify(this.finalData));
-      if (this.finalData.length >= 20){
+      if (this.finalData.length >= 2){
         var data_send = JSON.stringify({
           "merchant": "RETAIL",
           "data": this.finalData,
@@ -52,7 +52,7 @@ export default {
           "shopid": Vue.$cookies.get("shopid"),
           "cookie": Vue.$cookies.get("cookie"),
           "type" : "OUT",
-          "pre_tax" :parseInt(this.totalAmount) - parseInt(this.total_discount),
+          "pre_tax" :parseInt(this.totalAmount) ,
           "sgst" : this.total_sgst,
           "cgst" : this.total_cgst,
           "igst" : this.total_igst,
