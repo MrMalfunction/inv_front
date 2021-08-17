@@ -316,7 +316,8 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!Vue.$cookies.get("Roles")["Data_Out"] === "true") {
+      if (!(Vue.$cookies.get("Roles")["Data_Out"] === "true")) {
+        console.log("ADSA");
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")

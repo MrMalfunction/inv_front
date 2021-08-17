@@ -98,7 +98,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!Vue.$cookies.get("Roles")["View_Live"] === "true") {
+      if (!(Vue.$cookies.get("Roles")["View_Live"] === "true")) {
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")
