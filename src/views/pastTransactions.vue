@@ -43,20 +43,24 @@
       </form>
     </div>
 
-    <md-table v-model="finalTableData" md-sort="timestamp" md-sort-order="dsc" md-card class="tableArea" v-if="tableVisibilty">
+
+    <md-table v-model="finalTableData" md-card class="tableArea" v-if="tableVisibilty" >
       <md-table-toolbar>
         <h1 class="md-title">Retrieved Data</h1>
+
       </md-table-toolbar>
-
       <md-table-row slot="md-table-row" slot-scope="{ item }" >
-        <md-table-cell md-label="Timestamp"  md-sort-by="Timestamp" class="tableRows">{{ item.timestamp }}</md-table-cell>
-        <md-table-cell md-label="Transaction Id" md-sort-by="Transaction-Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
-        <md-table-cell md-label="Merchant" md-sort-by="merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
-        <md-table-cell md-label="Total, Discount" md-sort-by="total" class="tableRows">{{ item.total }}</md-table-cell>
-        <md-table-cell md-label="Data(Item Name, Item Count, Item Price)"  md-sort-by="Data" class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
+        <md-table-cell md-label="Timestamp"   class="tableRows">{{ item.timestamp }}</md-table-cell>
+        <md-table-cell md-label="Transaction Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
+        <md-table-cell md-label="Merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
+        <md-table-cell md-label="Total, Discount"  class="tableRows">{{ item.total }}</md-table-cell>
+        <md-table-cell md-label="Data(Item Name, Item Count, Item Price)"   class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
       </md-table-row>
-    </md-table>
 
+    </md-table>
+    <div >
+      <md-button  v-if="paginate === true" class="md-raised md-accent" @click="submit">Go to next Page</md-button>
+    </div>
     <md-snackbar :md-duration="2000" :md-active.sync="showSnackbar" md-persistent>
       <span> {{ this.errorMessage }} </span>
       <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
@@ -77,7 +81,7 @@ export default {
   components: {},
   computed: {
     tableVisibilty: function () {
-      return this.finalTableData !== {};
+      return (this.finalTableData !== null);
 
     }
   },
@@ -93,32 +97,26 @@ export default {
       fromDate: Number(past),
       toDate: Number(now),
       tableData: {
-        "Items": [
-          {
-            "pre_tax": "",
-            "shopid": "",
-            "sgst": "",
-            "data": [
-              {
-                "itemName": "",
-                "itemPrice": "",
-                "itemCount": ""
-              }
-            ],
-            "timestamp": "",
-            "total": "",
-            "cgst": "",
-            "transaction-id": "",
-            "merchant": "",
-            "igst": 0
-          }
-        ],
-        "Last_Key": "NULL"
       },
       finalTableData: null,
       lastKey: "NULL",
       errorMessage: null,
-      showSnackbar: false
+      showSnackbar: false,
+      paginate: false
+    }
+  },
+
+  watch:{
+    lastKey: function (){
+      this.paginate = this.lastKey !== "NULL";
+    },
+    fromDate: function (){
+      if (this.lastKey !== "NULL")
+        this.lastKey = "NULL"
+    },
+    toDate: function (){
+      if (this.lastKey !== "NULL")
+        this.lastKey = "NULL"
     }
   },
 
@@ -250,7 +248,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!Vue.$cookies.get("Roles")["View_Past"] === "true") {
+      if (!(Vue.$cookies.get("Roles")["View_Past"] === "true")) {
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")

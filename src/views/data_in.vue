@@ -318,7 +318,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!Vue.$cookies.get("Roles")["Data_In"] === "true") {
+      if (!(Vue.$cookies.get("Roles")["Data_In"] === "true")) {
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")
