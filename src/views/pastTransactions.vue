@@ -374,8 +374,8 @@ export default {
 }
 @media screen and (max-width: 800px) {
   .tableArea{
-    margin-left: 0%;
-    margin-right: 0%;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
