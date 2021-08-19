@@ -23,6 +23,10 @@
           <label>Employee Password</label>
           <md-input v-model="employeePassword"></md-input>
         </md-field>
+        <md-field>
+          <label>Your Password</label>
+          <md-input v-model="password" type="password"></md-input>
+        </md-field>
         <md-button type="submit" class="md-accent" @click="submit">Submit</md-button>
       </div>
     </form>
@@ -44,8 +48,8 @@ export default {
     return {
       employeeName: null,
       employeePassword: null,
-      roles: []
-
+      roles: [],
+      password: null
     }
   },
 
@@ -109,7 +113,43 @@ export default {
       this.shopName = Vue.$cookies.get("shopid")
     },
     submit(){
-      alert("SUBMITTED");
+      var data = JSON.stringify({
+        "shopid": Vue.$cookies.get('shopid'),
+        "username": Vue.$cookies.get("username"),
+        "new_username": this.employeeName,
+        "new_password": this.employeePassword,
+        "roles": this.roles,
+        "password": this.password,
+        "type": "SignUp"
+      });
+      console.log(data);
+      var config = {
+        method: 'post',
+        url: 'https://inv.amolbohora.com/auth',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: data
+      };
+      var that = this;
+      axios(config)
+          .then(function (response) {
+            console.log(response.data);
+          })
+          .catch(function (error) {
+            that.showSnackbar = true;
+            that.errorMessage = error.response.data['Message'];
+            console.log(error);
+            window.setTimeout(() => {
+              if (error.response.data['Message'] === "Cookie not matched") {
+                Vue.$cookies.remove("cookie")
+                Vue.$cookies.remove("username")
+                Vue.$cookies.remove("shopid")
+                Vue.$cookies.remove("CC")
+                that.$router.replace("/")
+              }
+            }, 1000)
+          });
     }
   },
   beforeMount() {

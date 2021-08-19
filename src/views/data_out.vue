@@ -229,6 +229,10 @@ export default {
     },
     inputUpdate(index, type) {
       this.dataCheck[index][type] = false
+      if (type === "itemName"){
+        if (this.dataIn[index]['itemName'] in this.itemPrice)
+          this.dataIn[index]['itemPrice'] = this.itemPrice[this.dataIn[index]['itemName']]
+      }
     },
 
     add(index) {
@@ -426,7 +430,6 @@ export default {
     },
     listChecker(){
       let local_data = localStorage.getItem("Merchant");
-      console.log(local_data)
       if (local_data === null){
         var data = JSON.stringify({
           "shopid" : Vue.$cookies.get("shopid"),
@@ -460,7 +463,6 @@ export default {
       }
 
       local_data = localStorage.getItem("Items");
-      console.log(local_data)
       if (local_data === null){
         data = JSON.stringify({
           "shopid" : Vue.$cookies.get("shopid"),
@@ -479,26 +481,41 @@ export default {
         that = this;
         axios(config)
             .then(function (response) {
-              console.log(response.data['Data'])
-              that.itemList = response.data['Data']
-              localStorage.setItem("Items", JSON.stringify(that.itemList))
+              var temp = response.data['Data'];
+              localStorage.setItem("Items", JSON.stringify(temp));
+              that.$router.go()
             })
             .catch(function (error){
               that.showSnackbar = true;
               that.errorMessage = error.response.data['Message'];
               console.log(error);
-
             });
       }
-      else {
-        this.itemList = JSON.parse(localStorage.getItem("Items"))
+    },
+    itemPriceSetter(){
+      var temp = null;
+      temp = JSON.parse(localStorage.getItem("Items"));
+      console.log(temp);
+      let itemList = [];
+      let itemPrice = {};
+      for (var i = 0; i < temp.length; i++){
+        if (temp[i].includes(',')){
+          const[name, price] = temp[i].split(',');
+          itemList.push(name);
+          itemPrice[name] = price;
+        }
+        else
+          itemList.push(temp[i])
       }
+      this.itemList = itemList;
+      this.itemPrice = itemPrice;
     }
   },
   beforeMount() {
     this.CC();
     this.roleCheck();
     this.listChecker();
+    this.itemPriceSetter();
     this.autoOn = localStorage.getItem("auto") === 'true';
     this.active = localStorage.getItem("auto") === 'true';
   }

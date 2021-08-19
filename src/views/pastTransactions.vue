@@ -21,6 +21,7 @@
           </div>
           <div class="md-layout-item">
             <md-field>
+              <label>Type of Transaction</label>
               <md-select v-model="type" placeholder="Type of Transaction">
                 <md-option value="IN" aria-selected="true">IN</md-option>
                 <md-option value="OUT">OUT</md-option>
@@ -44,7 +45,7 @@
     </div>
 
 
-    <md-table v-model="finalTableData" md-card class="tableArea" v-if="tableVisibilty" >
+    <md-table v-model="finalTableData" md-card class="tableArea md-small-size-100 md-elevation-15" v-if="tableVisibilty" >
       <md-table-toolbar>
         <h1 class="md-title">Retrieved Data</h1>
 
@@ -54,7 +55,7 @@
         <md-table-cell md-label="Transaction Id" class="tableRows">{{ item.Transaction_Id }}</md-table-cell>
         <md-table-cell md-label="Merchant" class="tableRows">{{ item.merchant }}</md-table-cell>
         <md-table-cell md-label="Total, Discount"  class="tableRows">{{ item.total }}</md-table-cell>
-        <md-table-cell md-label="Data(Item Name, Item Count, Item Price)"   class="tableRows"> <pre>{{ item.data }}</pre> </md-table-cell>
+        <md-table-cell md-label="Data (Item Name, Item Count, Item Price)" class="tableRows "> <pre>{{ item.data }}</pre> </md-table-cell>
       </md-table-row>
 
     </md-table>
@@ -125,7 +126,11 @@ export default {
     submit() {
       this.merchantName = this.merchantName === null ? "NULL" : this.merchantName;
       this.type = this.type === "" ? "IN" : this.type;
-
+      if (this.toDate < this.fromDate){
+        this.showSnackbar = true;
+        this.errorMessage = "From Date Can't be greater than to Date";
+        return;
+      }
       var data = JSON.stringify({
         "shopid": Vue.$cookies.get('shopid'),
         "merchant": this.merchantName,
@@ -255,8 +260,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      this.username = Vue.$cookies.get("username")
-      this.shopName = Vue.$cookies.get("shopid")
+
     },
     modifier() {
       var temp = this.tableData['Items'];
@@ -324,6 +328,8 @@ export default {
     }
   },
   beforeMount() {
+    this.username = Vue.$cookies.get("username")
+    this.shopName = Vue.$cookies.get("shopid")
     this.modifier();
     this.CC();
     this.roleCheck();
@@ -359,11 +365,32 @@ export default {
   min-width: 30vw;
   padding: 20px;
   border-radius: 10px;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 
 .tableRows{
-  border-style: dashed;
-  border-width: thin;
   text-align: left;
 }
+@media screen and (max-width: 800px) {
+  .tableArea{
+    margin-left: 0%;
+    margin-right: 0%;
+  }
+}
+
+@media print{
+    .tableArea{
+      margin: 0;
+      padding: 0;
+    }
+  @page
+  {
+    size: portrait;
+    margin: 10px;
+  }
+
+}
+
+
 </style>
