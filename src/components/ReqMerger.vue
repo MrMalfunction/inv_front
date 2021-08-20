@@ -38,11 +38,11 @@ export default {
           this.finalData.push(temp);
         }
       }
-      this.total_cgst += cgst;
-      this.total_igst += igst;
-      this.total_sgst += sgst;
+      this.total_cgst += parseInt(cgst);
+      this.total_igst += parseInt(igst);
+      this.total_sgst += parseInt(sgst);
       this.totalAmount += parseInt(total);
-      this.total_discount += discount;
+      this.total_discount += parseInt(discount);
       console.log(JSON.stringify(this.finalData));
       if (this.finalData.length >= 2){
         var data_send = JSON.stringify({
