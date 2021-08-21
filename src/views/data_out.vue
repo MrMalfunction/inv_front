@@ -8,7 +8,7 @@
     <md-switch v-model="autoOn" class="md-accent auto" @change="updateAutoOn">Camera Automatically</md-switch>
     <md-dialog-alert
         :md-active.sync="orderCheck"
-        md-title="Order Id"
+        md-title="Success"
         :md-content= order_id_message />
     <div class="Form">
       <form novalidate @submit.prevent="">
@@ -76,7 +76,7 @@
             </div>
             <md-button @click="scan()" v-if="!active">Start Scanning for above item</md-button>
             <md-button @click="stop()" v-if="active">Stop Scanning</md-button>
-            <StreamBarcodeReader v-if="active" @decode="(a, b, c) => onDecode(a)"></StreamBarcodeReader>
+            <StreamBarcodeReader v-if="active" @decode="(a) => onDecode(a)"></StreamBarcodeReader>
           </div>
           <div class="md-layout md-gutter md-alignment-center GST">
             <md-field class="md-layout-item md-medium-size-33 md-small-size-50 md-xsmall-size-100 gst-module ">
@@ -138,7 +138,7 @@ export default {
   },
   computed: {
     order_id_message : function (){
-      return "Order Success <br> Order Id is <strong>" + this.order_id + " </strong>"
+      return "Order Id is <strong>" + this.order_id + " </strong>"
     },
     total_pre_tax: function () {
       var temp = 0
