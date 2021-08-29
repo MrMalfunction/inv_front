@@ -1,38 +1,25 @@
 <template>
   <div>
     <md-toolbar md-elevation="0" style="margin-top: 10px">
+
       <h3 class="md-title" style="flex: 1; text-align: center">Welcome to {{ this.shopName }}</h3>
     </md-toolbar>
     Welcome {{ username }}<br>
-    <form novalidate @submit.prevent="">
-      <div class=" mainArea md-small-size-100 md-elevation-15">
-        <md-field>
-          <label>Employee Name</label>
-          <md-input v-model="employeeName"></md-input>
-        </md-field>
-        <div class="roles">
-          <md-checkbox v-model="roles" value="SignUp">SignUp</md-checkbox>
-          <md-checkbox v-model="roles" value="View_Past">View Past</md-checkbox>
-          <md-checkbox v-model="roles" value="Return">Return</md-checkbox>
-          <md-checkbox v-model="roles" value="Data_In">Data In</md-checkbox>
-          <md-checkbox v-model="roles" value="Data_Out">Data Out</md-checkbox>
-          <md-checkbox v-model="roles" value="View_Live">View Live</md-checkbox>
-          <md-checkbox v-model="roles" value="Reset">Reset</md-checkbox>
-        </div>
-        <md-field>
-          <label>Employee Password</label>
-          <md-input v-model="employeePassword"></md-input>
-        </md-field>
-        <md-field>
-          <label>Your Password</label>
-          <md-input v-model="password" type="password"></md-input>
-        </md-field>
-        <md-button type="submit" class="md-accent" @click="submit">Submit</md-button>
-      </div>
-    </form>
+    <div class=" mainArea md-small-size-100 md-elevation-15">
+      <span class="md-display-1">Enter the year for export of annual data</span>
+      <md-field>
+        <label>Year</label>
+        <md-input v-model="fetchYear" type="number" aria-valuemin="2000"></md-input>
+      </md-field>
+      <md-field>
+        <label>Email-id</label>
+        <md-input v-model="email" type="email"></md-input>
+      </md-field>
+      <md-button type="submit" class="md-accent" @click="submit">Export</md-button>
+    </div>
     <md-dialog-alert
-        :md-active.sync="liveVisiblity"
-        md-content= "User Created"
+        :md-active.sync="success_Visibilty"
+        md-content= "Export Request Sent, will arrive on the mentioned email"
         md-confirm-text="Close"/>
     <md-snackbar :md-duration="2000" :md-active.sync="showSnackbar" md-persistent>
       <span> {{ this.errorMessage }} </span>
@@ -49,22 +36,64 @@ const cookieExpiry = "100s";
 
 
 export default {
-  name: "SignUp",
+  name: "Export",
   components: {},
   computed: {},
   data() {
     return {
-      employeeName: null,
-      employeePassword: null,
-      roles: [],
-      password: null,
+      username: null,
+      shopName: null,
+      fetchYear: null,
+      email: null,
       showSnackbar: false,
       errorMessage: null,
-      liveVisiblity: false,
+      success_Visibilty: false
     }
   },
 
   methods: {
+
+    async submit() {
+      var data = JSON.stringify({
+        "shopid": Vue.$cookies.get('shopid'),
+        "username": Vue.$cookies.get("username"),
+        "year": this.fetchYear,
+        "email": this.email,
+        "cookie": Vue.$cookies.get('cookie')
+      });
+      console.log(data);
+      var config = {
+        method: 'post',
+        url: 'https://inv.amolbohora.com/export',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: data
+      };
+      var that = this;
+      axios(config)
+          .then(function(response){
+            if (response.status === 200){
+              that.success_Visibilty = true
+            }
+          })
+          .catch(function (error) {
+            that.showSnackbar = true;
+            that.errorMessage = error.response.data['Message'];
+            console.log(error);
+            window.setTimeout(() => {
+              if (error.response.data['Message'] === "Cookie not matched") {
+                Vue.$cookies.remove("cookie")
+                Vue.$cookies.remove("username")
+                Vue.$cookies.remove("shopid")
+                Vue.$cookies.remove("CC")
+                that.$router.replace("/")
+              }
+            }, 1000)
+          });
+
+    },
+
     async CC() {
       if (!Vue.$cookies.isKey("CC")) {
         const self = this;
@@ -113,7 +142,7 @@ export default {
         Vue.$cookies.remove("CC")
         this.$router.push("/")
       }
-      if (!(Vue.$cookies.get("Roles")["SignUp"] === "true")) {
+      if (!Vue.$cookies.get("Roles")["Export"] === "true") {
         Vue.$cookies.remove("cookie")
         Vue.$cookies.remove("username")
         Vue.$cookies.remove("shopid")
@@ -122,47 +151,6 @@ export default {
       }
       this.username = Vue.$cookies.get("username")
       this.shopName = Vue.$cookies.get("shopid")
-    },
-    submit(){
-      var data = JSON.stringify({
-        "shopid": Vue.$cookies.get('shopid'),
-        "username": Vue.$cookies.get("username"),
-        "new_username": this.employeeName,
-        "new_password": this.employeePassword,
-        "roles": this.roles,
-        "password": this.password,
-        "type": "SignUp"
-      });
-      console.log(data);
-      var config = {
-        method: 'post',
-        url: 'https://inv.amolbohora.com/auth',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
-      };
-      var that = this;
-      axios(config)
-          .then(function (response) {
-            console.log(response.data);
-            that.liveVisiblity = true;
-            that.$router.go();
-          })
-          .catch(function (error) {
-            that.showSnackbar = true;
-            that.errorMessage = error.response.data['Message'];
-            console.log(error);
-            window.setTimeout(() => {
-              if (error.response.data['Message'] === "Cookie not matched") {
-                Vue.$cookies.remove("cookie")
-                Vue.$cookies.remove("username")
-                Vue.$cookies.remove("shopid")
-                Vue.$cookies.remove("CC")
-                that.$router.replace("/")
-              }
-            }, 1000)
-          });
     }
   },
   beforeMount() {

@@ -52,6 +52,11 @@ const routes = [
     path: "/Reset",
     name: "Reset",
     component: () => import('../views/Reset')
+  },
+  {
+    path: "/Export",
+    name: "Export",
+    component: () => import('../views/Export')
   }
 ]
 

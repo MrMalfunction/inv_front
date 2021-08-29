@@ -20,6 +20,10 @@
             md-confirm-text="Close"/>
       </div>
     </form>
+    <md-snackbar :md-duration="2000" :md-active.sync="showSnackbar" md-persistent>
+      <span> {{ this.errorMessage }} </span>
+      <md-button class="md-primary" @click="showSnackbar = false">Close</md-button>
+    </md-snackbar>
   </div>
 </template>
 
@@ -46,6 +50,8 @@ export default {
       itemList : [],
       livecount: null,
       liveVisiblity: false,
+      showSnackbar: false,
+      errorMessage: null
     }
   },
 
